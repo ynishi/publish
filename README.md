@@ -1,4 +1,4 @@
-# Publish
+# Publish [![Build Status](https://travis-ci.org/ynishi/publish.svg?branch=master)](https://travis-ci.org/ynishi/publish)
 
 * Publish documents to multi web service.
 * Document block is human can manage, not raw log.
