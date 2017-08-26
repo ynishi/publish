@@ -1,25 +1,38 @@
-package main
+package publish
 
 import (
-	"fmt"
+	"io"
 
 	"github.com/spf13/viper"
 )
 
-type Config struct {
-	Msg string
+type Publisher interface {
+	Publish(io.Reader) error
 }
 
-func greet(name string) string {
-	return fmt.Sprintf("hello, %s!", name)
+var reader io.Reader
+
+func Publish(publishers []Publisher) error {
+
+	for _, publisher := range publishers {
+		err := publisher.Publish(reader)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func main() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(".")
-	viper.ReadInConfig()
-	p := viper.GetStringMap("person")
+func SetReader(r io.Reader) {
+	reader = r
+}
 
-	fmt.Printf("%s\n", greet(p["name"].(string)))
+type PublishGitHub struct {
+	Publisher
+	Conf *viper.Viper
+}
+
+func (pgh *PublishGitHub) Publish(r io.Reader) error {
+
+	return nil
 }
