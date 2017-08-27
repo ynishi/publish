@@ -41,6 +41,7 @@ const (
 	contentBase64   = `IyB0ZXN0`
 	filename        = `doc.md`
 	contentEncoding = `utf-8`
+	message         = `Change doc.md(by publishGitHub)`
 )
 
 var (
@@ -183,7 +184,7 @@ func TestPublishGitHub(t *testing.T) {
 		testMethod(t, r, "POST")
 
 		want := &createCommit{
-			Message: github.String("m"),
+			Message: github.String(message),
 			Tree:    github.String("st2"),
 			Parents: []string{"s"},
 		}
