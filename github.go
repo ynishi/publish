@@ -3,6 +3,7 @@ package publish
 import (
 	"errors"
 	"io"
+	"io/ioutil"
 
 	"context"
 	"fmt"
@@ -24,13 +25,17 @@ type PublishGitHubOpts struct {
 	Token    string
 	Branch   string
 	Endpoint string
+	Encoding string
+	Path     string
 }
 
 func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	var pgho PublishGitHubOpts
+	pgh.Conf.SetDefault("Encoding", "utf-8")
 	pgh.Conf.ReadInConfig()
 	pgh.Conf.Unmarshal(&pgho)
 
+	// make client
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: pgho.Token},
@@ -38,13 +43,19 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	tc := oauth2.NewClient(ctx, ts)
 
 	client := github.NewClient(tc)
-	u, err := url.Parse(pgho.Endpoint)
+	e := ""
+	if pgho.Endpoint[len(pgho.Endpoint)-1:] != "/" {
+		e = "/"
+	}
+	u, err := url.Parse(pgho.Endpoint + e)
 	if err != nil {
 		return err
 	}
 	client.BaseURL = u
+	client.UploadURL = u
 	service := client.Git
 
+	// prepare
 	pRef, _, err := service.GetRef(pgho.Owner, pgho.Repo, fmt.Sprintf("heads/%s", pgho.Branch))
 	if err != nil {
 		return err
@@ -59,17 +70,42 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	if pTree.Entries == nil {
 		return errors.New("error: cannot fetch parent tree.")
 	}
-
-	parent, _, err := client.Git.GetCommit(pgho.Owner, pgho.Repo, *pRef.Object.SHA)
+	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
+	str := string(buf)
+	blob := &github.Blob{
+		Content:  github.String(str),
+		Encoding: github.String(pgho.Encoding),
+		Size:     github.Int(len(str)),
+	}
+	b, _, err := service.CreateBlob(pgho.Owner, pgho.Repo, blob)
+	if err != nil {
+		return err
+	}
+	entry := github.TreeEntry{
+		Path: github.String(pgho.Path),
+		Mode: github.String("100644"),
+		Type: github.String("blob"),
+		SHA:  b.SHA,
+	}
+	entries := []github.TreeEntry{entry}
+	tree, _, err := service.CreateTree(pgho.Owner, pgho.Repo, *pRef.Object.SHA, entries)
+
+	// commit
+	parent, _, err := client.Git.GetCommit(pgho.Owner, pgho.Repo, *pRef.Object.SHA)
+	if err != nil {
+
+		return err
+	}
 	if parent == nil {
+
 		return errors.New("error: cannot fetch parent commit.")
 	}
 	input := &github.Commit{
 		Message: github.String("m"),
-		Tree:    &github.Tree{SHA: pTree.SHA},
+		Tree:    tree,
 		Parents: []github.Commit{{SHA: parent.SHA}},
 	}
 	commit, _, err := client.Git.CreateCommit(pgho.Owner, pgho.Repo, input)
