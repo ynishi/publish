@@ -2,8 +2,6 @@ package publish
 
 import (
 	"io"
-
-	"github.com/spf13/viper"
 )
 
 type Publisher interface {
@@ -25,14 +23,4 @@ func Publish(publishers []Publisher) error {
 
 func SetReader(r io.Reader) {
 	reader = r
-}
-
-type PublishGitHub struct {
-	Publisher
-	Conf *viper.Viper
-}
-
-func (pgh *PublishGitHub) Publish(r io.Reader) error {
-
-	return nil
 }
