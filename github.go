@@ -35,6 +35,9 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	pgh.Conf.ReadInConfig()
 	pgh.Conf.Unmarshal(&pgho)
 
+	if pgho.Owner == "" || pgho.Repo == "" || pgho.Token == "" || pgho.Branch == "" || pgho.Path == "" {
+		return errors.New("error: cannot fetch conf vars.")
+	}
 	// make client
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(

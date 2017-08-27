@@ -86,6 +86,12 @@
   revision = "25b30aa063fc18e48662b86996252eabdcf2f0c7"
 
 [[projects]]
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp"]
@@ -124,6 +130,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "668395c26a51faf04a6f872d3ef0c1789c3b92b81dca5d642cc421d3691fceb3"
+  inputs-digest = "a38652c5878b11abfbfd83557d20fa7cbdd90d7da8bec303a0d9cc0980dcaba3"
   solver-name = "gps-cdcl"
   solver-version = 1
