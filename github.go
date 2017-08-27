@@ -43,16 +43,18 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	tc := oauth2.NewClient(ctx, ts)
 
 	client := github.NewClient(tc)
-	e := ""
-	if pgho.Endpoint[len(pgho.Endpoint)-1:] != "/" {
-		e = "/"
+	if pgho.Endpoint != "" {
+		e := ""
+		if pgho.Endpoint[len(pgho.Endpoint)-1:] != "/" {
+			e = "/"
+		}
+		u, err := url.Parse(pgho.Endpoint + e)
+		if err != nil {
+			return err
+		}
+		client.BaseURL = u
+		client.UploadURL = u
 	}
-	u, err := url.Parse(pgho.Endpoint + e)
-	if err != nil {
-		return err
-	}
-	client.BaseURL = u
-	client.UploadURL = u
 	service := client.Git
 
 	// prepare
@@ -104,7 +106,7 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 		return errors.New("error: cannot fetch parent commit.")
 	}
 	input := &github.Commit{
-		Message: github.String("m"),
+		Message: github.String(fmt.Sprintf("Change %s(by publishGitHub)", pgho.Path)),
 		Tree:    tree,
 		Parents: []github.Commit{{SHA: parent.SHA}},
 	}
