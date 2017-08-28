@@ -30,6 +30,9 @@ type PublishGitHubOpts struct {
 }
 
 func (pgh *PublishGitHub) Publish(r io.Reader) error {
+	if pgh.Conf == nil {
+		return errors.New("error: conf is nil. pointer to viper is needed.")
+	}
 	var pgho PublishGitHubOpts
 	pgh.Conf.SetDefault("Encoding", "utf-8")
 	pgh.Conf.ReadInConfig()
