@@ -32,10 +32,22 @@
   revision = "392dba7d905ed5d04a5794ba89f558b27e2ba1ca"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "be5ece7dd465ab0765a9682137865547526d1dfb"
   version = "v1.7.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
   branch = "master"
@@ -69,6 +81,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "2df9a531813370438a4d79bfc33e21f58063ed87"
+
+[[projects]]
+  branch = "master"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
   revision = "0efa5202c04663c757d84f90f5219c1250baf94f"
@@ -84,12 +102,6 @@
   name = "github.com/spf13/viper"
   packages = ["."]
   revision = "25b30aa063fc18e48662b86996252eabdcf2f0c7"
-
-[[projects]]
-  name = "github.com/urfave/cli"
-  packages = ["."]
-  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
-  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
@@ -130,6 +142,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a38652c5878b11abfbfd83557d20fa7cbdd90d7da8bec303a0d9cc0980dcaba3"
+  inputs-digest = "5e54f2a527a9a62bf3616e76a382b22185259946de914447269158221542b662"
   solver-name = "gps-cdcl"
   solver-version = 1
