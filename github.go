@@ -34,11 +34,17 @@ type PublishGitHubOpts struct {
 }
 
 func (pgh *PublishGitHub) Publish(r io.Reader) error {
+	if pgh.Conf == nil {
+		return errors.New("error: conf is nil. pointer to viper is needed.")
+	}
 	var pgho PublishGitHubOpts
 	pgh.Conf.SetDefault("Encoding", "utf-8")
 	pgh.Conf.ReadInConfig()
 	pgh.Conf.Unmarshal(&pgho)
 
+	if pgho.Owner == "" || pgho.Repo == "" || pgho.Token == "" || pgho.Branch == "" || pgho.Path == "" {
+		return errors.New("error: cannot fetch conf vars.")
+	}
 	// make client
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(

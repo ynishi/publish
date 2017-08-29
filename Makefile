@@ -1,8 +1,12 @@
-.PHONY: build clean
+.PHONY: build clean install
 
 build: clean
 	go test
+	cd cmd && go test
 	go build
 
 clean:
 	rm -f "$(basename $(pwd))"
+
+install: build
+	go install github.com/ynishi/publish/cmd/publish
