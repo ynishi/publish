@@ -4,3 +4,6 @@ install:
   - dep ensure
 go:
   - 1.8
+addons:
+  hosts:
+    - bkt.mock-region.test-amazonaws.com
