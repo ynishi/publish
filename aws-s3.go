@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/spf13/viper"
@@ -25,6 +26,7 @@ type PublishAwsS3Opts struct {
 	Key       string
 	Accesskey string
 	Secretkey string
+	Token     string
 	Region    string
 }
 
@@ -54,9 +56,15 @@ func (p *PublishAwsS3) Publish(r io.Reader) error {
 		return errors.New("error: cannot fetch conf vars.")
 	}
 
+	cred := credentials.NewStaticCredentials(
+		po.Accesskey,
+		po.Secretkey,
+		po.Token,
+	)
 	if p.Svc == nil {
 		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String(po.Region),
+			Credentials: cred,
+			Region:      aws.String(po.Region),
 		})
 		if err != nil {
 			return err
