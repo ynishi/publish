@@ -198,16 +198,22 @@ func TestPublishGitHub(t *testing.T) {
 		fmt.Fprint(w, `{"sha":"s2"}`)
 	})
 
+	github_toml := fmt.Sprintf(`
+[GitHub]
+Owner = "o"
+Repo = "r"
+Token = "t"
+Branch = "b"
+Endpoint = "%s"
+Encoding = "%s"
+Path = "%s"`, server.URL, contentEncoding, filename)
+
 	publishGitHub := &PublishGitHub{
 		Conf: viper.New(),
 	}
-	publishGitHub.Conf.Set("Owner", "o")
-	publishGitHub.Conf.Set("Repo", "r")
-	publishGitHub.Conf.Set("Token", "t")
-	publishGitHub.Conf.Set("Branch", "b")
-	publishGitHub.Conf.Set("Endpoint", server.URL)
-	publishGitHub.Conf.Set("Encoding", contentEncoding)
-	publishGitHub.Conf.Set("Path", filename)
+
+	publishGitHub.Conf.SetConfigType("toml")
+	publishGitHub.Conf.ReadConfig(strings.NewReader(github_toml))
 
 	r := strings.NewReader(content)
 	err := publishGitHub.Publish(r)
