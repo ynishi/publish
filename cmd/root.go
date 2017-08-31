@@ -31,14 +31,20 @@ Project is available at http://github.com/ynishi/publish`,
 			&publish.PublishGitHub{
 				Conf: ghConf,
 			},
+			&publish.PublishAwsS3{
+				Conf: aS3Conf,
+			},
 		}
-		publish.Publish(publishers)
+		err = publish.Publish(publishers)
+		if err != nil {
+			fmt.Println(err)
+		}
 	},
 }
 
 var (
 	cfgFile, content string
-	ghConf           *viper.Viper
+	ghConf, aS3Conf  *viper.Viper
 )
 
 func init() {
@@ -50,31 +56,38 @@ func init() {
 	viper.BindPFlag("content", RootCmd.PersistentFlags().Lookup("content"))
 
 	initGitHubConfig()
+
+	aS3Conf = viper.New()
+	setupConfPath(aS3Conf)
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		viper.AddConfigPath(home)
-		viper.AddConfigPath(".")
-		viper.SetConfigName(".publish")
-		viper.SetConfigType("toml")
-	}
-
+	setupConfPath(viper.GetViper())
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println("Can't read config:", err)
 		os.Exit(1)
 	}
 }
 
+func setupConfPath(v *viper.Viper) {
+	if cfgFile != "" {
+		v.SetConfigFile(cfgFile)
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		v.AddConfigPath(home)
+		v.AddConfigPath(".")
+		v.SetConfigName(".publish")
+		v.SetConfigType("toml")
+	}
+}
+
 func initGitHubConfig() {
 	ghConf = viper.New()
+	setupConfPath(ghConf)
 
 	home, err := homedir.Dir()
 	if err != nil {
