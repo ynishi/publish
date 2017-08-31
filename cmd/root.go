@@ -52,7 +52,7 @@ var (
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "", ".publish.toml", "config file (default is . or $HOME/.publish.toml)")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "", "config.toml", "config file (default in . or $HOME/.publish or /etc/publish)")
 	RootCmd.PersistentFlags().StringVarP(&content, "content", "c", "content.md", "content to publish( default is ./content.md")
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("content", RootCmd.PersistentFlags().Lookup("content"))
