@@ -40,7 +40,7 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 	var pgho PublishGitHubOpts
 	pgh.Conf.SetDefault("Encoding", "utf-8")
 	pgh.Conf.ReadInConfig()
-	pgh.Conf.Unmarshal(&pgho)
+	pgh.Conf.UnmarshalKey("GitHub", &pgho)
 
 	if pgho.Owner == "" || pgho.Repo == "" || pgho.Token == "" || pgho.Branch == "" || pgho.Path == "" {
 		return errors.New("error: cannot fetch conf vars.")
