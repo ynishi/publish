@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"os"
 
+	"path"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ynishi/publish"
-	"path"
 )
 
 var RootCmd = &cobra.Command{
@@ -80,7 +81,7 @@ func setupConfPath(v *viper.Viper) {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		v.AddConfigPath(path.Join(home,".publish"))
+		v.AddConfigPath(path.Join(home, ".publish"))
 		v.AddConfigPath(".")
 		v.AddConfigPath("/etc/publish")
 		v.SetConfigName("config")
