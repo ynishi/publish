@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ynishi/publish"
+	"path"
 )
 
 var RootCmd = &cobra.Command{
@@ -55,7 +56,8 @@ func init() {
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("content", RootCmd.PersistentFlags().Lookup("content"))
 
-	initGitHubConfig()
+	ghConf = viper.New()
+	setupConfPath(ghConf)
 
 	aS3Conf = viper.New()
 	setupConfPath(aS3Conf)
@@ -78,29 +80,10 @@ func setupConfPath(v *viper.Viper) {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		v.AddConfigPath(home)
+		v.AddConfigPath(path.Join(home,".publish"))
 		v.AddConfigPath(".")
-		v.SetConfigName(".publish")
+		v.AddConfigPath("/etc/publish")
+		v.SetConfigName("config")
 		v.SetConfigType("toml")
-	}
-}
-
-func initGitHubConfig() {
-	ghConf = viper.New()
-	setupConfPath(ghConf)
-
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	ghConf.AddConfigPath(home)
-	ghConf.AddConfigPath(".")
-	ghConf.SetConfigName(".publishGitHub")
-	ghConf.SetConfigType("toml")
-
-	if err := ghConf.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
 	}
 }
