@@ -55,7 +55,6 @@ func (p *PublishAwsS3) Publish(r io.Reader) error {
 	if input.Bucket == nil || input.Key == nil || po.Accesskey == "" || po.Secretkey == "" || po.Region == "" {
 		return errors.New("error: cannot fetch conf vars.")
 	}
-
 	cred := credentials.NewStaticCredentials(
 		po.Accesskey,
 		po.Secretkey,
