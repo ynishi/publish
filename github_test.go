@@ -48,6 +48,14 @@ const (
 	filename        = `doc.md`
 	contentEncoding = `utf-8`
 	message         = `Change doc.md(by publishGitHub)`
+	testTomlTmpl    = `[GitHub]
+Owner = "o"
+Repo = "r"
+Token = "t"
+Branch = "b"
+Endpoint = "%s"
+Encoding = "%s"
+Path = "%s"`
 )
 
 var (
@@ -58,6 +66,35 @@ var (
 func init() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
+}
+
+func TestInitConfGitHub(t *testing.T) {
+
+	testEndpoint := "endpoint"
+
+	testGitHubOpts := &PublishGitHubOpts{
+		Owner:    "o",
+		Repo:     "r",
+		Token:    "t",
+		Branch:   "b",
+		Endpoint: testEndpoint,
+		Encoding: contentEncoding,
+		Path:     filename,
+	}
+
+	github_toml := fmt.Sprintf(testTomlTmpl, testEndpoint, contentEncoding, filename)
+
+	publishGitHub := &PublishGitHub{}
+
+	c := viper.New()
+	c.SetConfigType("toml")
+	c.ReadConfig(strings.NewReader(github_toml))
+
+	InitConfGitHub(publishGitHub, c)
+
+	if !reflect.DeepEqual(publishGitHub.GitHub, testGitHubOpts) {
+		t.Fatalf("GitHub not matchted\n want: %q,\n have: %q", testGitHubOpts, publishGitHub.GitHub)
+	}
 }
 
 func TestPublishGitHub(t *testing.T) {
@@ -200,23 +237,15 @@ func TestPublishGitHub(t *testing.T) {
 		fmt.Fprint(w, `{"sha":"s2"}`)
 	})
 
-	github_toml := fmt.Sprintf(`
-[GitHub]
-Owner = "o"
-Repo = "r"
-Token = "t"
-Branch = "b"
-Endpoint = "%s"
-Encoding = "%s"
-Path = "%s"`, server.URL, contentEncoding, filename)
+	github_toml := fmt.Sprintf(testTomlTmpl, server.URL, contentEncoding, filename)
 
-	publishGitHub := &PublishGitHub{
-		Conf: viper.New(),
-	}
+	publishGitHub := &PublishGitHub{}
 
-	publishGitHub.Conf.SetConfigType("toml")
-	publishGitHub.Conf.ReadConfig(strings.NewReader(github_toml))
+	c := viper.New()
+	c.SetConfigType("toml")
+	c.ReadConfig(strings.NewReader(github_toml))
 
+	InitConfGitHub(publishGitHub, c)
 	ctx := context.Background()
 	r := strings.NewReader(content)
 	err := publishGitHub.Publish(ctx, r)

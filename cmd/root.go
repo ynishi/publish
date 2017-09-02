@@ -29,15 +29,24 @@ Project is available at http://github.com/ynishi/publish`,
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		publish.SetReader(r)
 		publish.SetTimeout(time.Duration(timeout) * time.Second)
+
+		pas3 := &publish.PublishAwsS3{}
+		pgh := &publish.PublishGitHub{}
+
+		err = publish.InitConfAwsS3(pas3, aS3Conf)
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = publish.InitConfGitHub(pgh, ghConf)
+		if err != nil {
+			fmt.Println(err)
+		}
 		publishers := []publish.Publisher{
-			&publish.PublishGitHub{
-				Conf: ghConf,
-			},
-			&publish.PublishAwsS3{
-				Conf: aS3Conf,
-			},
+			pgh,
+			pas3,
 		}
 		err = publish.Publish(publishers)
 		if err != nil {
@@ -54,7 +63,8 @@ var (
 
 func init() {
 	cobra.OnInitialize(func() {
-		initConfig()
+		setupConfPath(viper.GetViper())
+
 		ghConf = viper.New()
 		setupConfPath(ghConf)
 
@@ -70,17 +80,8 @@ func init() {
 	viper.BindPFlag("timeout", RootCmd.PersistentFlags().Lookup("timeout"))
 }
 
-func initConfig() {
-	setupConfPath(viper.GetViper())
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
-	}
-}
-
 func setupConfPath(v *viper.Viper) {
 
-	fmt.Println(cfgFile)
 	if cfgFile != "" {
 		v.SetConfigFile(cfgFile)
 	} else {
@@ -94,5 +95,9 @@ func setupConfPath(v *viper.Viper) {
 		v.AddConfigPath("/etc/publish")
 		v.SetConfigName("config")
 		v.SetConfigType("toml")
+	}
+	if err := v.ReadInConfig(); err != nil {
+		fmt.Println("Can't read config:", err)
+		os.Exit(1)
 	}
 }

@@ -20,7 +20,7 @@ import (
 
 type PublishGitHub struct {
 	Publisher
-	Conf *viper.Viper
+	GitHub *PublishGitHubOpts
 }
 
 type PublishGitHubOpts struct {
@@ -33,14 +33,21 @@ type PublishGitHubOpts struct {
 	Path     string
 }
 
-func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
-	if pgh.Conf == nil {
+func InitConfGitHub(gh *PublishGitHub, c *viper.Viper) (err error) {
+	if c == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
 	}
-	var pgho PublishGitHubOpts
-	pgh.Conf.SetDefault("Encoding", "utf-8")
-	pgh.Conf.ReadInConfig()
-	pgh.Conf.UnmarshalKey("GitHub", &pgho)
+	c.SetDefault("Encoding", "utf-8")
+	err = c.UnmarshalKey("GitHub", &gh.GitHub)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
+
+	pgho := pgh.GitHub
 
 	if pgho.Owner == "" || pgho.Repo == "" || pgho.Token == "" || pgho.Branch == "" || pgho.Path == "" {
 		return errors.New("error: cannot fetch conf vars.")

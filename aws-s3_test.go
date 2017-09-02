@@ -15,6 +15,8 @@ import (
 
 	"context"
 
+	"reflect"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/awstesting/unit"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -25,7 +27,7 @@ const (
 	bucket_test     = `bkt`
 	region_test     = `mock-region`
 	endpoint_test   = `mock-region.test-amazonaws.com`
-	awss3_test_toml = `
+	awss3_toml_test = `
 [AwsS3]
 Bucket = "bkt"
 Key = "doc.md"
@@ -34,7 +36,7 @@ Secretkey = "s"
 Region = "mock-region"
 [AwsS3POI]
 ServerSideEncryption = "AES256"
-Contenttype = "text/plain"
+ContentType = "text/plain"
 `
 )
 
@@ -42,6 +44,36 @@ type s3BucketTest struct {
 	bucket  string
 	url     string
 	errCode string
+}
+
+func TestInitConfAwsS3(t *testing.T) {
+
+	testAwsS3 := &PublishAwsS3Opts{
+		Bucket:    "bkt",
+		Key:       "doc.md",
+		Accesskey: "a",
+		Secretkey: "s",
+		Region:    "mock-region",
+	}
+	testAwsS3POI := &s3.PutObjectInput{
+		ServerSideEncryption: aws.String("AES256"),
+		ContentType:          aws.String("text/plain"),
+	}
+
+	publishAwsS3 := &PublishAwsS3{}
+	c := viper.New()
+	c.SetConfigType("toml")
+	c.ReadConfig(strings.NewReader(awss3_toml_test))
+
+	InitConfAwsS3(publishAwsS3, c)
+
+	if !reflect.DeepEqual(publishAwsS3.AwsS3, testAwsS3) {
+		t.Fatalf("AwsS3 not matchted.\n want: %q,\n have: %q\n", testAwsS3, publishAwsS3.AwsS3)
+	}
+	if !reflect.DeepEqual(publishAwsS3.AwsS3POI, testAwsS3POI) {
+		t.Fatalf("AwsS3POI not matchted.\n want: %q,\n have: %q\n", testAwsS3POI, publishAwsS3.AwsS3POI)
+	}
+
 }
 
 func TestPublishAwsS3(t *testing.T) {
@@ -68,12 +100,12 @@ func TestPublishAwsS3(t *testing.T) {
 		DisableSSL: aws.Bool(true),
 	})
 
-	publishAwsS3 := &PublishAwsS3{
-		Conf: viper.New(),
-	}
-	publishAwsS3.Conf.SetConfigType("toml")
-	publishAwsS3.Conf.ReadConfig(strings.NewReader(awss3_test_toml))
+	publishAwsS3 := &PublishAwsS3{}
+	c := viper.New()
+	c.SetConfigType("toml")
+	c.ReadConfig(strings.NewReader(awss3_toml_test))
 
+	InitConfAwsS3(publishAwsS3, c)
 	ctx := context.Background()
 	r := strings.NewReader(content)
 	publishAwsS3.Svc = svc

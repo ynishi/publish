@@ -6,6 +6,7 @@ package publish
 
 import (
 	"io"
+	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,6 +14,8 @@ import (
 	"context"
 
 	"time"
+
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -83,5 +86,13 @@ func TestSetTimeout(t *testing.T) {
 	SetTimeout(t5)
 	if timeout != t5 {
 		t.Fatalf("Failed match timeout.\n want: %q,\n have: %q\n", t5, timeout)
+	}
+}
+
+func TestSetLogger(t *testing.T) {
+	tlogger := log.New(os.Stdout, "testSetLog", log.Lshortfile)
+	SetLogger(tlogger)
+	if !reflect.DeepEqual(logger, tlogger) {
+		t.Fatalf("Failed match logger.\n want: %q,\n have: %q\n", tlogger, logger)
 	}
 }
