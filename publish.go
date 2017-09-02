@@ -8,6 +8,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"os"
 	"time"
 )
 
@@ -20,6 +21,10 @@ var (
 	timeout time.Duration
 	logger  *log.Logger
 )
+
+func init() {
+	SetLogger(log.New(os.Stdout, "publish: ", log.LstdFlags|log.Llongfile))
+}
 
 func Publish(publishers []Publisher) error {
 

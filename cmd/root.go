@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -25,6 +26,8 @@ var RootCmd = &cobra.Command{
 This application is a tool for a working document to set on web services.
 Project is available at http://github.com/ynishi/publish`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Print("start root command")
+
 		r, err := os.Open(content)
 		if err != nil {
 			fmt.Println(err)
@@ -52,6 +55,7 @@ Project is available at http://github.com/ynishi/publish`,
 		if err != nil {
 			fmt.Println(err)
 		}
+		log.Print("end root command")
 	},
 }
 
@@ -62,6 +66,9 @@ var (
 )
 
 func init() {
+	log.SetPrefix("publish")
+	log.SetFlags(log.LstdFlags)
+
 	cobra.OnInitialize(func() {
 		setupConfPath(viper.GetViper())
 
