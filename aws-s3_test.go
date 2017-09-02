@@ -13,6 +13,8 @@ import (
 
 	"fmt"
 
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/awstesting/unit"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -72,9 +74,10 @@ func TestPublishAwsS3(t *testing.T) {
 	publishAwsS3.Conf.SetConfigType("toml")
 	publishAwsS3.Conf.ReadConfig(strings.NewReader(awss3_test_toml))
 
+	ctx := context.Background()
 	r := strings.NewReader(content)
 	publishAwsS3.Svc = svc
-	err := publishAwsS3.Publish(r)
+	err := publishAwsS3.Publish(ctx, r)
 	if err != nil {
 		t.Fatal(err)
 	}

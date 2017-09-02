@@ -16,6 +16,7 @@ func TestRootCmd(t *testing.T) {
 	RootCmd.SetArgs([]string{
 		"--content=test.md",
 		"--config=test.toml",
+		"--timeout=120",
 	})
 	err := RootCmd.Execute()
 	if err != nil {

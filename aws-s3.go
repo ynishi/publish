@@ -8,6 +8,8 @@ import (
 	"errors"
 	"io"
 
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -30,7 +32,7 @@ type PublishAwsS3Opts struct {
 	Region    string
 }
 
-func (p *PublishAwsS3) Publish(r io.Reader) error {
+func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) error {
 
 	if p.Conf == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
@@ -42,9 +44,15 @@ func (p *PublishAwsS3) Publish(r io.Reader) error {
 	if err != nil {
 		return err
 	}
+	if po == nil {
+		return errors.New("error: awss3 conf read failed.")
+	}
 	err = p.Conf.UnmarshalKey("AwsS3POI", &input)
 	if err != nil {
 		return err
+	}
+	if input == nil {
+		return errors.New("error: awss3poi conf read failed.")
 	}
 	if po.Bucket != "" {
 		input.Bucket = aws.String(po.Bucket)

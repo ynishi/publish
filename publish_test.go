@@ -10,6 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"context"
+
+	"time"
+
 	"github.com/spf13/viper"
 )
 
@@ -18,7 +22,7 @@ type MockPublisher struct {
 	Conf *viper.Viper
 }
 
-func (m *MockPublisher) Publish(r io.Reader) error {
+func (m *MockPublisher) Publish(ctx context.Context, r io.Reader) error {
 	return nil
 }
 
@@ -27,6 +31,7 @@ var mockPublisher *MockPublisher
 
 func init() {
 	SetReader(strings.NewReader(`<html></html>`))
+	SetTimeout(3 * time.Second)
 	mockPublisher = &MockPublisher{
 		Conf: viper.New(),
 	}
@@ -40,9 +45,21 @@ func TestPublisher(t *testing.T) {
 	if !reflect.DeepEqual(mockPublisher.Conf, conf) {
 		t.Fatalf("Failed match reader.\n want: %q,\n have: %q\n", conf, mockPublisher.Conf)
 	}
-	err := mockPublisher.Publish(reader)
-	if err != nil {
-		t.Fatal(err)
+	errChan := make(chan error, 1)
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	go func() {
+		errChan <- mockPublisher.Publish(ctx, reader)
+	}()
+	select {
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	case err := <-errChan:
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -58,5 +75,13 @@ func TestSetReader(t *testing.T) {
 	SetReader(r)
 	if !reflect.DeepEqual(reader, r) {
 		t.Fatalf("Failed match reader.\n want: %q,\n have: %q\n", r, reader)
+	}
+}
+
+func TestSetTimeout(t *testing.T) {
+	t5 := 5 * time.Second
+	SetTimeout(t5)
+	if timeout != t5 {
+		t.Fatalf("Failed match timeout.\n want: %q,\n have: %q\n", t5, timeout)
 	}
 }

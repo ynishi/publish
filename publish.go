@@ -5,26 +5,47 @@
 package publish
 
 import (
+	"context"
 	"io"
+	"time"
 )
 
 type Publisher interface {
-	Publish(io.Reader) error
+	Publish(context.Context, io.Reader) error
 }
 
-var reader io.Reader
+var (
+	reader  io.Reader
+	timeout time.Duration
+)
 
 func Publish(publishers []Publisher) error {
 
+	errChan := make(chan error, 1)
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	for _, publisher := range publishers {
-		err := publisher.Publish(reader)
-		if err != nil {
-			return err
-		}
+		go func() {
+			errChan <- publisher.Publish(ctx, reader)
+		}()
+	}
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-errChan:
+		return err
 	}
 	return nil
 }
 
 func SetReader(r io.Reader) {
 	reader = r
+}
+
+func SetTimeout(t time.Duration) {
+	timeout = t
 }
