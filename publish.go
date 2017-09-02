@@ -7,6 +7,7 @@ package publish
 import (
 	"context"
 	"io"
+	"log"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type Publisher interface {
 var (
 	reader  io.Reader
 	timeout time.Duration
+	logger  *log.Logger
 )
 
 func Publish(publishers []Publisher) error {
@@ -48,4 +50,8 @@ func SetReader(r io.Reader) {
 
 func SetTimeout(t time.Duration) {
 	timeout = t
+}
+
+func SetLogger(l *log.Logger) {
+	logger = l
 }

@@ -19,8 +19,9 @@ import (
 
 type PublishAwsS3 struct {
 	Publisher
-	Svc  *s3.S3
-	Conf *viper.Viper
+	Svc      *s3.S3
+	AwsS3    *PublishAwsS3Opts
+	AwsS3POI *s3.PutObjectInput
 }
 
 type PublishAwsS3Opts struct {
@@ -32,25 +33,30 @@ type PublishAwsS3Opts struct {
 	Region    string
 }
 
-func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) error {
-
-	if p.Conf == nil {
+func InitConfAwsS3(as3 *PublishAwsS3, c *viper.Viper) (err error) {
+	if c == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
 	}
-	var po *PublishAwsS3Opts
-	var input *s3.PutObjectInput
-	p.Conf.ReadInConfig()
-	err := p.Conf.UnmarshalKey("AwsS3", &po)
+	err = c.UnmarshalKey("AwsS3", &as3.AwsS3)
 	if err != nil {
 		return err
 	}
+	err = c.UnmarshalKey("AwsS3POI", &as3.AwsS3POI)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) (err error) {
+
+	po := p.AwsS3
+	input := p.AwsS3POI
+
 	if po == nil {
 		return errors.New("error: awss3 conf read failed.")
 	}
-	err = p.Conf.UnmarshalKey("AwsS3POI", &input)
-	if err != nil {
-		return err
-	}
+
 	if input == nil {
 		return errors.New("error: awss3poi conf read failed.")
 	}
