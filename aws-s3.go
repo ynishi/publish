@@ -48,7 +48,13 @@ func InitConfAwsS3(as3 *PublishAwsS3, c *viper.Viper) (err error) {
 	return nil
 }
 
+func (p *PublishAwsS3) String() string {
+	return "PublishAwsS3"
+}
+
 func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) (err error) {
+
+	logger.Println("start publish aws s3")
 
 	po := p.AwsS3
 	input := p.AwsS3POI
@@ -91,5 +97,7 @@ func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) (err error) {
 	if err != nil {
 		return err
 	}
+	logger.Printf("aws s3 put: %s/%s", *input.Bucket, *input.Key)
+	logger.Println("end publish aws s3")
 	return nil
 }
