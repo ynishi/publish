@@ -38,6 +38,7 @@ func Publish(publishers []Publisher) error {
 		go func() {
 			errChan <- publisher.Publish(ctx, reader)
 		}()
+		time.Sleep(1 * time.Second)
 	}
 
 	select {
