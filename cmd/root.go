@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"path"
 
@@ -29,6 +30,7 @@ Project is available at http://github.com/ynishi/publish`,
 			fmt.Println(err)
 		}
 		publish.SetReader(r)
+		publish.SetTimeout(time.Duration(timeout) * time.Second)
 		publishers := []publish.Publisher{
 			&publish.PublishGitHub{
 				Conf: ghConf,
@@ -46,22 +48,26 @@ Project is available at http://github.com/ynishi/publish`,
 
 var (
 	cfgFile, content string
+	timeout          int
 	ghConf, aS3Conf  *viper.Viper
 )
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		initConfig()
+		ghConf = viper.New()
+		setupConfPath(ghConf)
+
+		aS3Conf = viper.New()
+		setupConfPath(aS3Conf)
+	})
 
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "", "config.toml", "config file (default in . or $HOME/.publish or /etc/publish)")
 	RootCmd.PersistentFlags().StringVarP(&content, "content", "c", "content.md", "content to publish( default is ./content.md")
+	RootCmd.PersistentFlags().IntVarP(&timeout, "timeout", "t", 300, "timeout each publish in seconds(default is 300 Seconds)")
 	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("content", RootCmd.PersistentFlags().Lookup("content"))
-
-	ghConf = viper.New()
-	setupConfPath(ghConf)
-
-	aS3Conf = viper.New()
-	setupConfPath(aS3Conf)
+	viper.BindPFlag("timeout", RootCmd.PersistentFlags().Lookup("timeout"))
 }
 
 func initConfig() {
@@ -73,6 +79,8 @@ func initConfig() {
 }
 
 func setupConfPath(v *viper.Viper) {
+
+	fmt.Println(cfgFile)
 	if cfgFile != "" {
 		v.SetConfigFile(cfgFile)
 	} else {

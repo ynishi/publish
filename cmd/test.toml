@@ -1,0 +1,17 @@
+[GitHub]
+Owner = "o"
+Repo = "r"
+Token = "t"
+Branch = "b"
+Endpoint = "%s"
+Encoding = "%s"
+Path = "%s"
+[AwsS3]
+Bucket = "bkt"
+Key = "doc.md"
+Accesskey = "a"
+Secretkey = "s"
+Region = "mock-region"
+[AwsS3POI]
+ServerSideEncryption = "AES256"
+Contenttype = "text/plain"

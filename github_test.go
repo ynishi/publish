@@ -14,6 +14,8 @@ import (
 
 	"strings"
 
+	"context"
+
 	"github.com/google/go-github/github"
 	"github.com/spf13/viper"
 )
@@ -215,8 +217,9 @@ Path = "%s"`, server.URL, contentEncoding, filename)
 	publishGitHub.Conf.SetConfigType("toml")
 	publishGitHub.Conf.ReadConfig(strings.NewReader(github_toml))
 
+	ctx := context.Background()
 	r := strings.NewReader(content)
-	err := publishGitHub.Publish(r)
+	err := publishGitHub.Publish(ctx, r)
 	if err != nil {
 		t.Fatal(err)
 	}

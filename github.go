@@ -33,7 +33,7 @@ type PublishGitHubOpts struct {
 	Path     string
 }
 
-func (pgh *PublishGitHub) Publish(r io.Reader) error {
+func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 	if pgh.Conf == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
 	}
@@ -46,7 +46,6 @@ func (pgh *PublishGitHub) Publish(r io.Reader) error {
 		return errors.New("error: cannot fetch conf vars.")
 	}
 	// make client
-	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: pgho.Token},
 	)
