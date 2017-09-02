@@ -143,6 +143,8 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 		},
 	}
 	service.UpdateRef(context.Background(), pgho.Owner, pgho.Repo, nRef, false)
+	logger.Printf("github committed: %s/%s/%s, %s", pgho.Owner, pgho.Repo, *entry.Path, *commit.SHA)
+
 	logger.Println("end publish github")
 	return nil
 }

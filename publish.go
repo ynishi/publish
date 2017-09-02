@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	SetLogger(log.New(os.Stdout, "publish: ", log.LstdFlags|log.Llongfile))
+	SetLogger(log.New(os.Stdout, "publish: ", log.LstdFlags|log.Lshortfile))
 }
 
 func Publish(publishers []Publisher) error {
