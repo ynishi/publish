@@ -30,13 +30,13 @@ func Publish(publishers []Publisher) error {
 
 	n := len(publishers)
 	logger.Printf("all publishers: %d", n)
-	errc := make(chan error,1	)
+	errc := make(chan error, 1)
 	ctx := context.Background()
 
 	for _, publisher := range publishers {
-		go func (publisher Publisher) {
-			ctx,cancel := context.WithTimeout(ctx,timeout)
-			ctx = context.WithValue(ctx,"name", publisher)
+		go func(publisher Publisher) {
+			ctx, cancel := context.WithTimeout(ctx, timeout)
+			ctx = context.WithValue(ctx, "name", publisher)
 			defer cancel()
 
 			go func() {
@@ -52,8 +52,8 @@ func Publish(publishers []Publisher) error {
 	}
 
 	for {
-		err := <- errc
-        if err != nil {
+		err := <-errc
+		if err != nil {
 			n--
 			logger.Printf("todo: %d, err: %q\n", n, err)
 		} else {
