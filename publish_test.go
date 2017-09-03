@@ -26,6 +26,8 @@ type MockPublisher struct {
 }
 
 func (m *MockPublisher) Publish(ctx context.Context, r io.Reader) error {
+	logger.Println("mock job start")
+	logger.Println("mock job done")
 	return nil
 }
 
