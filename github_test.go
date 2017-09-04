@@ -246,10 +246,32 @@ func TestPublishGitHub(t *testing.T) {
 	c.ReadConfig(strings.NewReader(github_toml))
 
 	InitConfGitHub(publishGitHub, c)
-	ctx := context.Background()
 	r := strings.NewReader(content)
-	err := publishGitHub.Publish(ctx, r)
-	if err != nil {
-		t.Fatal(err)
+
+	errChan := make(chan error, 1)
+	ctx := context.Background()
+
+	go func() {
+		errChan <- publishGitHub.Publish(ctx, r)
+	}()
+
+	select {
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	case err := <-errChan:
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	ctxc, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go publishGitHub.Publish(ctxc, r)
+	cancel()
+	select {
+	case <-ctxc.Done():
+		// do nothing
+	default:
+		t.Fatal("failed cancel: %q", ctx)
 	}
 }

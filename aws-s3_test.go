@@ -106,11 +106,32 @@ func TestPublishAwsS3(t *testing.T) {
 	c.ReadConfig(strings.NewReader(awss3_toml_test))
 
 	InitConfAwsS3(publishAwsS3, c)
-	ctx := context.Background()
 	r := strings.NewReader(content)
 	publishAwsS3.Svc = svc
-	err := publishAwsS3.Publish(ctx, r)
-	if err != nil {
-		t.Fatal(err)
+
+	errChan := make(chan error, 1)
+	ctx := context.Background()
+
+	go func() {
+		errChan <- publishAwsS3.Publish(ctx, r)
+	}()
+	select {
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	case err := <-errChan:
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	ctxc, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go publishAwsS3.Publish(ctxc, r)
+	cancel()
+	select {
+	case <-ctxc.Done():
+		// do nothing
+	default:
+		t.Fatal("failed cancel: %q", ctx)
 	}
 }

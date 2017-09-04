@@ -93,11 +93,15 @@ func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) (err error) {
 
 	input.Body = aws.ReadSeekCloser(r)
 
-	_, err = p.Svc.PutObject(input)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	_, err = p.Svc.PutObjectWithContext(ctx, input)
 	if err != nil {
 		return err
 	}
 	logger.Printf("aws s3 put: %s/%s", *input.Bucket, *input.Key)
+
 	logger.Println("end publish aws s3")
 	return nil
 }

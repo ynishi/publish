@@ -17,6 +17,8 @@ import (
 
 	"os"
 
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -26,7 +28,22 @@ type MockPublisher struct {
 }
 
 func (m *MockPublisher) Publish(ctx context.Context, r io.Reader) error {
+	ictx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	logger.Println("mock job start")
+	for {
+		//if failed, loop not end.
+		fmt.Print("\rx")
+		fmt.Print("\r+")
+
+		select {
+		case <-ictx.Done():
+			return ictx.Err()
+		default:
+		}
+		break
+	}
+	fmt.Println()
 	logger.Println("mock job done")
 	return nil
 }
@@ -36,7 +53,7 @@ var mockPublisher *MockPublisher
 
 func init() {
 	SetReader(strings.NewReader(`<html></html>`))
-	SetTimeout(3 * time.Second)
+	SetTimeout(1 * time.Second)
 	mockPublisher = &MockPublisher{
 		Conf: viper.New(),
 	}
@@ -50,6 +67,15 @@ func TestPublisher(t *testing.T) {
 	if !reflect.DeepEqual(mockPublisher.Conf, conf) {
 		t.Fatalf("Failed match reader.\n want: %q,\n have: %q\n", conf, mockPublisher.Conf)
 	}
+
+	err := mockPublisher.Publish(context.Background(), reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPublish(t *testing.T) {
+
 	errChan := make(chan error, 1)
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -65,13 +91,6 @@ func TestPublisher(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
-}
-
-func TestPublish(t *testing.T) {
-	err := Publish(mockPublishers)
-	if err != nil {
-		t.Fatal(err)
 	}
 }
 
