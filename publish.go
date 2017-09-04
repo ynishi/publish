@@ -28,26 +28,43 @@ func init() {
 
 func Publish(publishers []Publisher) error {
 
-	errChan := make(chan error, 1)
-
+	n := len(publishers)
+	logger.Printf("all publishers: %d", n)
+	errc := make(chan error, 1)
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
 
 	for _, publisher := range publishers {
-		go func() {
-			errChan <- publisher.Publish(ctx, reader)
-		}()
-		time.Sleep(1 * time.Second)
+		go func(publisher Publisher) {
+			ctx, cancel := context.WithTimeout(ctx, timeout)
+			ctx = context.WithValue(ctx, "name", publisher)
+			defer cancel()
+
+			go func() {
+				errc <- publisher.Publish(ctx, reader)
+			}()
+
+			select {
+			case <-ctx.Done():
+				logger.Printf("%s, %s", ctx.Value("name"), ctx.Err())
+				return
+			}
+		}(publisher)
 	}
 
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case err := <-errChan:
-		return err
+	for {
+		err := <-errc
+		if err != nil {
+			n--
+			logger.Printf("todo: %d, err: %q\n", n, err)
+		} else {
+			n--
+			logger.Printf("todo: %d, job done", n)
+		}
+		if n < 1 {
+			logger.Println("all publishers done")
+			return nil
+		}
 	}
-	return nil
 }
 
 func SetReader(r io.Reader) {

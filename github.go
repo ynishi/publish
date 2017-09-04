@@ -79,14 +79,14 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 	service := client.Git
 
 	// prepare
-	pRef, _, err := service.GetRef(context.Background(), pgho.Owner, pgho.Repo, fmt.Sprintf("heads/%s", pgho.Branch))
+	pRef, _, err := service.GetRef(ctx, pgho.Owner, pgho.Repo, fmt.Sprintf("heads/%s", pgho.Branch))
 	if err != nil {
 		return err
 	}
 	if pRef.Object == nil {
 		return errors.New("error: cannot fetch parent ref.")
 	}
-	pTree, _, err := client.Git.GetTree(context.Background(), pgho.Owner, pgho.Repo, *pRef.Object.SHA, true)
+	pTree, _, err := client.Git.GetTree(ctx, pgho.Owner, pgho.Repo, *pRef.Object.SHA, true)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 		Encoding: github.String(pgho.Encoding),
 		Size:     github.Int(len(str)),
 	}
-	b, _, err := service.CreateBlob(context.Background(), pgho.Owner, pgho.Repo, blob)
+	b, _, err := service.CreateBlob(ctx, pgho.Owner, pgho.Repo, blob)
 	if err != nil {
 		return err
 	}
@@ -114,10 +114,10 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 		SHA:  b.SHA,
 	}
 	entries := []github.TreeEntry{entry}
-	tree, _, err := service.CreateTree(context.Background(), pgho.Owner, pgho.Repo, *pRef.Object.SHA, entries)
+	tree, _, err := service.CreateTree(ctx, pgho.Owner, pgho.Repo, *pRef.Object.SHA, entries)
 
 	// commit
-	parent, _, err := client.Git.GetCommit(context.Background(), pgho.Owner, pgho.Repo, *pRef.Object.SHA)
+	parent, _, err := client.Git.GetCommit(ctx, pgho.Owner, pgho.Repo, *pRef.Object.SHA)
 	if err != nil {
 
 		return err
@@ -131,7 +131,7 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 		Tree:    tree,
 		Parents: []github.Commit{{SHA: parent.SHA}},
 	}
-	commit, _, err := client.Git.CreateCommit(context.Background(), pgho.Owner, pgho.Repo, input)
+	commit, _, err := client.Git.CreateCommit(ctx, pgho.Owner, pgho.Repo, input)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 			SHA:  commit.SHA,
 		},
 	}
-	service.UpdateRef(context.Background(), pgho.Owner, pgho.Repo, nRef, false)
+	service.UpdateRef(ctx, pgho.Owner, pgho.Repo, nRef, false)
 	logger.Printf("github committed: %s/%s/%s, %s", pgho.Owner, pgho.Repo, *entry.Path, *commit.SHA)
 
 	logger.Println("end publish github")
