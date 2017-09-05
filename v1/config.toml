@@ -1,0 +1,20 @@
+# publish config
+
+# github.com config
+[GitHub]
+Owner = "owner"
+Repo = "repo"
+Token = "token"
+Branch = "branch"
+Path = "filepath.md"
+
+# aws s3 config
+[AwsS3]
+Bucket = "bucket"
+Key = "filepath.md"
+Accesskey = "accesskey"
+Secretkey = "secretkey"
+Region = "region"
+[AwsS3POI]
+ServerSideEncryption = "AES256"
+ContentType = "text/plain"
