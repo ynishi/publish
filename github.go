@@ -18,11 +18,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// PublishGitHub is Publisher for github.com
 type PublishGitHub struct {
 	Publisher
 	GitHub *PublishGitHubOpts
 }
 
+// PublishGitHubOpts is option for PublishGitHub.
 type PublishGitHubOpts struct {
 	Owner    string
 	Repo     string
@@ -33,10 +35,7 @@ type PublishGitHubOpts struct {
 	Path     string
 }
 
-func (gh *PublishGitHub) String() string {
-	return "PublishGitHub"
-}
-
+// InitConfGitHub initialize config and set option to PublishGitHub.
 func InitConfGitHub(gh *PublishGitHub, c *viper.Viper) (err error) {
 	if c == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
@@ -49,6 +48,12 @@ func InitConfGitHub(gh *PublishGitHub, c *viper.Viper) (err error) {
 	return nil
 }
 
+// String return name of PublishGitHub.
+func (gh *PublishGitHub) String() string {
+	return "PublishGitHub"
+}
+
+// Publish for PublishGitHub publish document to github.com(commit).
 func (pgh *PublishGitHub) Publish(ctx context.Context, r io.Reader) error {
 	logger.Println("start publish github")
 

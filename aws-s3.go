@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// PublishAwsS3 is Publisher for aws s3.
 type PublishAwsS3 struct {
 	Publisher
 	Svc      *s3.S3
@@ -24,6 +25,7 @@ type PublishAwsS3 struct {
 	AwsS3POI *s3.PutObjectInput
 }
 
+// PublishAwsS3Opts is option for PublishAwsS3.
 type PublishAwsS3Opts struct {
 	Bucket    string
 	Key       string
@@ -33,6 +35,7 @@ type PublishAwsS3Opts struct {
 	Region    string
 }
 
+// InitConfAwsS3 initialize config and set option to PublishAwsS3.
 func InitConfAwsS3(as3 *PublishAwsS3, c *viper.Viper) (err error) {
 	if c == nil {
 		return errors.New("error: conf is nil. pointer to viper is needed.")
@@ -48,10 +51,12 @@ func InitConfAwsS3(as3 *PublishAwsS3, c *viper.Viper) (err error) {
 	return nil
 }
 
+// String return name of PublishAwsS3.
 func (p *PublishAwsS3) String() string {
 	return "PublishAwsS3"
 }
 
+// Publish for PublishAwsS3 publish document to aws s3.
 func (p *PublishAwsS3) Publish(ctx context.Context, r io.Reader) (err error) {
 
 	logger.Println("start publish aws s3")

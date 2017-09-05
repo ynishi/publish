@@ -2,6 +2,10 @@
 // Use of this source code is governed by a Apache License 2.0
 // license that can be found in the LICENSE file.
 
+/*
+   The publish/cmd package implement command line interface for
+   publish. It use config file for each publisher.
+ */
 package cmd
 
 import (
@@ -18,6 +22,7 @@ import (
 	"github.com/ynishi/publish"
 )
 
+// RootCmd is root command.
 var RootCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish document to web services.",
